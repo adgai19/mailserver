@@ -1,0 +1,12 @@
+# Ignore build artifacts and sensitive files
+server
+*.pem
+*.key
+*.crt
+.env
+.envrc
+redis-data/
+certs/
+__pycache__/
+*.log
+.DS_Store

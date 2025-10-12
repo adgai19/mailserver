@@ -1,0 +1,39 @@
+services:
+  mailapi:
+    build: .
+    container_name: mailapi
+    restart: always
+    ports:
+      - "80:80"     # HTTP (redirect)
+      - "443:443"   # HTTPS
+      - "25:25"     # SMTP
+    volumes:
+      - ./certs:/app/certs:ro
+    environment:
+      - GIN_MODE=release
+      - REDIS_ADDR=redis:6379
+      - DOMAIN=${DOMAIN}
+      - API_KEY=${API_KEY}
+    depends_on:
+      - redis
+    networks:
+      - mailnet
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis-data:/data
+    expose:
+      - "6379"
+    networks:
+      - mailnet
+
+volumes:
+  redis-data:
+
+networks:
+  mailnet:
+    driver: bridge
