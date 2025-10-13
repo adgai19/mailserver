@@ -27,11 +27,13 @@ type App struct {
 
 var (
 	allowedDomain string
+	key           string
 )
 
 func init() {
 
 	allowedDomain = os.Getenv("DOMAIN")
+	key = os.Getenv("API_KEY")
 
 }
 
@@ -77,10 +79,6 @@ func (b *Backend) NewSession(c *smtp.Conn) (smtp.Session, error) {
 func (s *Session) Data(r io.Reader) error {
 
 	ctx := context.Background()
-
-	if !allow(ctx, s.app.Redis, fmt.Sprintf("smtp:%s", s.from), 50, time.Minute) {
-		return fmt.Errorf("rate limit exceeded")
-	}
 
 	mr, err := mail.CreateReader(r)
 	if err != nil {
@@ -198,7 +196,6 @@ func main() {
 		}
 	}()
 
-	key := os.Getenv("API_KEY")
 	validAPIKeys := map[string]bool{
 		key: true,
 	}
@@ -227,7 +224,7 @@ func main() {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		var out []map[string]any
+		out := make([]map[string]any, 0, len(msgs)) // ensures [] not null
 		for _, m := range msgs {
 			var v map[string]any
 			_ = json.Unmarshal([]byte(m), &v)
