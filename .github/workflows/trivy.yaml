@@ -1,0 +1,24 @@
+trivy:
+  name: Vulnerability Scan (Trivy)
+  runs-on: ubuntu-latest
+
+  permissions:
+    contents: read
+    security-events: write
+
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Trivy (SARIF output)
+      uses: aquasecurity/trivy-action@0.24.0
+      with:
+        scan-type: fs
+        scan-ref: .
+        format: sarif
+        output: trivy-results.sarif
+        severity: HIGH,CRITICAL
+
+    - name: Upload SARIF
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: trivy-results.sarif
