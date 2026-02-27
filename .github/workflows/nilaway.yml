@@ -1,0 +1,32 @@
+name: NilAway Static Analysis
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  nilaway:
+    name: Detect Potential Nil Panics
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Go (uses your go.mod version)
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # 3. Run NilAway analysis using the Marketplace action
+      - name: Run Nilaway
+        uses: qbaware/nilaway-action@v0.0.14
+        with:
+          package-to-scan: ./...
